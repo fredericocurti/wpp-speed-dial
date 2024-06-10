@@ -56,6 +56,7 @@
   }
 
   const onChangeCountry = (e) => {
+    dialCode = e.target.value
     chrome.storage.sync.set({ dialCode: e.target.value })
   }
 
