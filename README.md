@@ -4,6 +4,13 @@
 
 ![banner](https://github.com/fredericocurti/wpp-speed-dial/assets/18482433/c5f57638-46e7-49cc-b4bc-77de17ec2ace)
 
+## Usage
+
+Click the following button to install the extension:
+
+
+[![Download in Chrome WebStore](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png)](https://chromewebstore.google.com/detail/whatsapp-speed-dial/opbmpfpiifddpiggglhbgnmklhlnjgah)
+
 
 ## Installing
 
