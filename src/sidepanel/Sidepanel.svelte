@@ -1,10 +1,12 @@
 <script>
   import { onMount } from 'svelte'
+  import countries from './countries.json'
 
   let variables = {}
   let templates = {}
   let template = ''
   let phone = ''
+  let dialCode = '+55'
 
   $: isDisabled = template.length === 0
   $: {
@@ -28,8 +30,9 @@
   const onPressSend = () => {
     // Replace variables using js instead of handlebars
     const text = template.replace(/{{(.*?)}}/g, (_, key) => variables[key])
-    const cellphone = phone.replace(/[^0-9]/g, '')
-    const url = `https://wa.me/${cellphone}?text=${encodeURIComponent(text)}`
+    const phoneCountryCode = phone.startsWith('+') ? '' : dialCode
+    const fullPhone = `${phoneCountryCode}${phone}`.replace(/[^0-9]/g, '')
+    const url = `https://wa.me/${fullPhone}?text=${encodeURIComponent(text)}`
     window.open(url, '_blank')
   }
 
@@ -52,6 +55,10 @@
     templates = nextTemplates
   }
 
+  const onChangeCountry = (e) => {
+    chrome.storage.sync.set({ dialCode: e.target.value })
+  }
+
   const onPressTemplate = (t) => {
     template = t
   }
@@ -66,6 +73,10 @@
       template = Object.values(templates)[0] || ''
     })
 
+    chrome.storage.sync.get('dialCode', (data) => {
+      dialCode = data?.dialCode || '+55'
+    })
+
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'sync' && changes.phone) {
         phone = changes?.phone?.newValue?.trim?.() ?? ''
@@ -77,11 +88,9 @@
 <main>
   <h3>Whatsapp Speed Dial</h3>
 
-  <div class="calc">
-    <div>
-      <label>Template</label>
-    </div>
+  <h4>Template</h4>
 
+  <div class="calc">
     <div style="display:flex; gap: 8px;">
       {#each Object.values(templates) as t}
         <button on:click={() => onPressTemplate(t)}>{getTemplateKey(t)}</button>
@@ -90,39 +99,54 @@
 
     <textarea bind:value={template} />
     <div style="display: flex; justify-content: flex-end; width: 100%; gap: 8px;">
-      <button disabled={isDisabled} on:click={onPressSave}>Save +</button>
-      <button disabled={isDisabled} on:click={onPressDelete}>Delete X</button>
+      <button disabled={isDisabled} on:click={onPressSave}>Save ❤️</button>
+      <button disabled={isDisabled} on:click={onPressDelete}>Delete ✕</button>
     </div>
   </div>
 
-  <label>Variables</label>
-  <div style="display: flex; gap: 8px; flex-direction:column;">
-    {#each Object.keys(variables) as k}
-      <div style="display:flex;justify-content:space-between; gap: 8px;">
-        <span>{k}</span>
-        <input style="flex:1" type="text" bind:value={variables[k]} />
-      </div>
-    {/each}
-  </div>
+  <div id="divider"></div>
 
-  {#if Object.keys(variables).length === 0}
-    <p>{`No variables found, try something like hello {{name}}`}</p>
+  <h4>Variables</h4>
+
+  {#if Object.keys(variables).length > 0}
+    <div style="display: flex; gap: 8px; flex-direction:column;">
+      {#each Object.keys(variables) as k}
+        <div style="display:flex;justify-content:space-between; gap: 8px;">
+          <span>{k}</span>
+          <input style="flex:1" type="text" bind:value={variables[k]} />
+        </div>
+      {/each}
+    </div>
   {/if}
 
-  <div style="border-top: 1px solid white; padding-top: 12px; margin-top: 6px; display: flex; gap: 8px;">
+  {#if Object.keys(variables).length === 0}
+    <p>No variables found, try typing something like <code>{`hello {{name}}`}</code></p>
+  {/if}
+
+  <div id="divider"></div>
+
+  <h4>Send</h4>
+
+  <div style="display: flex; gap: 8px;">
     <label>Phone</label>
     <input type="text" bind:value={phone} />
   </div>
 
-  <div>
-    <div on:click={onPressSend} style="background-color: var(--green); padding: 4px; cursor: pointer;user-select: none;">Send with WhatsApp</div>
+  <div style="display: flex; gap: 8px;">
+    <label>Default country</label>
+    <select name="dialCode" style="max-width: 160px;" on:change={onChangeCountry} value={dialCode}>
+      {#each countries as c}
+        <option value={c.dial_code}>{c.name} {c.dial_code} {c.flag}</option>
+      {/each}
+    </select>
   </div>
+
+  <div id="send" on:click={onPressSend}>Send with WhatsApp</div>
 </main>
 
 <style>
   :root {
-    --green: #075E54
-    ;
+    --green: #075e54;
   }
 
   :global(:root) {
@@ -160,6 +184,7 @@
     flex-direction: column;
     gap: 8px;
     display: flex;
+    user-select: none;
   }
 
   textarea {
@@ -182,10 +207,20 @@
     gap: 8px;
   }
 
-  a {
-    font-size: 0.5rem;
-    margin: 0.5rem;
-    color: #cccccc;
-    text-decoration: none;
+  #divider {
+    border-top: 1px solid grey;
+  }
+
+  #send {
+    margin-top: 8px;
+    background-color: var(--green);
+    padding: 8px 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 0;
   }
 </style>
