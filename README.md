@@ -1,6 +1,9 @@
-# wpp-speed-dial
+# <img src="public/icons/logo.png" height="32" /> wpp-speed-dial
 
-> a chrome extension tools built with Vite + Svelte, and Manifest v3
+> A chrome extension to quickly send messages to phone numbers on webpages
+
+![banner](https://github.com/fredericocurti/wpp-speed-dial/assets/18482433/c5f57638-46e7-49cc-b4bc-77de17ec2ace)
+
 
 ## Installing
 
